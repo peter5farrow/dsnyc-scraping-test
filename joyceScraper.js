@@ -1,10 +1,18 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const dotenv = require("dotenv");
+const Airtable = require("airtable");
+
+dotenv.config();
+
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
+  process.env.AIRTABLE_BASE_ID
+);
+const tableName = "Shows";
+const url = `https://www.joyce.org/performances`;
 
 async function scrapeSite() {
-  const url = `https://www.joyce.org/performances`;
   const { data } = await axios.get(url);
-
   const $ = cheerio.load(data);
 
   const results = [];
@@ -57,8 +65,17 @@ scrapeSite()
       infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
     }
 
-    console.log(companiesArray);
-    console.log(datesArray);
-    console.log(infoArray);
+    for (let i = 0; i < result[0]["companies"].length; i++) {
+      const record = {
+        "Show Title": companiesArray[i],
+      };
+      base(tableName).create(record, function (err, record) {
+        if (err) {
+          console.error("Error inserting into Airtable:", err);
+          return;
+        }
+        console.log("Inserted into Airtable:", record.getId());
+      });
+    }
   })
   .catch((err) => console.log(err));
