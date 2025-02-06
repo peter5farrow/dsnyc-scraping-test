@@ -9,7 +9,7 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
   process.env.AIRTABLE_BASE_ID
 );
 const tableName = "Shows";
-const url = `https://www.joyce.org/performances`;
+const url = process.env.JOYCE_URL;
 
 async function scrapeSite() {
   const { data } = await axios.get(url);
@@ -30,10 +30,14 @@ async function scrapeSite() {
 scrapeSite()
   .then((result) => {
     const companiesArray = [];
-    const starts = [];
-    const ends = [];
+    const startDatesArray = [];
+    const endDatesArray = [];
     const datesArray = [];
     const infoArray = [];
+
+    const d = new Date();
+    // let year = d.getFullYear();
+    const year = 2002;
 
     for (let i = 0; i < result[0]["companies"].length; i++) {
       companiesArray.push(
@@ -42,40 +46,50 @@ scrapeSite()
     }
 
     for (let i = 0; i < result[0]["startDates"].length; i++) {
-      starts.push(
+      startDatesArray.push(
         result[0]["startDates"][`${i}`]["children"][0]["data"]
           .trimStart()
-          .trimEnd()
+          .trimEnd() +
+          " " +
+          year
       );
     }
 
     for (let i = 0; i < result[0]["endDates"].length; i++) {
-      ends.push(
+      endDatesArray.push(
         result[0]["endDates"][`${i}`]["children"][0]["data"]
           .trimStart()
-          .trimEnd()
+          .trimEnd() +
+          " " +
+          year
       );
     }
 
-    for (let i = 0; i < starts.length; i++) {
-      datesArray.push(`${starts[i]} - ${ends[i]}`);
+    for (let i = 0; i < startDatesArray.length; i++) {
+      datesArray.push(`${startDatesArray[i]} - ${endDatesArray[i]}`);
     }
 
     for (let i = 0; i < result[0]["info"].length; i++) {
       infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
     }
 
+    // CREATE RECORD FUNCTION
+
     for (let i = 0; i < result[0]["companies"].length; i++) {
       const record = {
         "Show Title": companiesArray[i],
+        "Full Show Description": infoArray[i],
+        // Date: startDatesArray[i],
+        // "End Date": endDatesArray[i],
       };
-      base(tableName).create(record, function (err, record) {
-        if (err) {
-          console.error("Error inserting into Airtable:", err);
-          return;
-        }
-        console.log("Inserted into Airtable:", record.getId());
-      });
+      // base(tableName).create(record, function (err, record) {
+      //   if (err) {
+      //     console.error("Error inserting into Airtable:", err);
+      //     return;
+      //   }
+      //   console.log("Inserted into Airtable:", record.getId());
+      // });
+      console.log(record);
     }
   })
   .catch((err) => console.log(err));

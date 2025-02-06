@@ -1,10 +1,18 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const dotenv = require("dotenv");
+const Airtable = require("airtable");
+
+dotenv.config();
+
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
+  process.env.AIRTABLE_BASE_ID
+);
+const tableName = "Shows";
+const url = process.env.BAM_URL;
 
 async function scrapeSite() {
-  const url = `https://www.bam.org`;
   const { data } = await axios.get(url);
-
   const $ = cheerio.load(data);
 
   const results = [];
@@ -21,46 +29,73 @@ async function scrapeSite() {
 scrapeSite()
   .then((result) => {
     const titlesArray = [];
-    const datesArray = [];
+    const startDatesArray = [];
+    const endDatesArray = [];
     const infoArray = [];
+
+    const d = new Date();
+    // let year = d.getFullYear();
+    const year = 2002;
 
     for (let i = 0; i < result[0]["titles"].length; i++) {
       titlesArray.push(result[0]["titles"][`${i}`]["children"][0]["data"]);
     }
 
     for (let i = 0; i < result[0]["dates"].length; i++) {
-      datesArray.push(result[0]["dates"][`${i}`]["children"][0]["data"]);
+      const eachDate = result[0]["dates"][`${i}`]["children"][0]["data"];
+
+      if (eachDate.includes("—")) {
+        startDatesArray.push(eachDate.split("—")[0] + " " + year);
+        endDatesArray.push(eachDate.split("—")[1]);
+      } else {
+        startDatesArray.push(eachDate);
+        endDatesArray.push(eachDate);
+      }
     }
 
     for (let i = 0; i < result[0]["info"].length; i++) {
-      // WORKING ONE
       infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
-
-      // TESTING
-      // if (
-      //   i === 0 ||
-      //   result[0]["info"][i]["parent"] === result[0]["info"][i - 1]["parent"]
-      // ) {
-      //   shortList.push(result[0]["info"][i]["children"][0]["data"]);
-      // }
     }
-    console.log(infoArray);
-    // OTHER TEST
-    const finalArray = [];
+
+    const finalInfoArray = [];
     const shortList = [];
-    for (const text of infoArray) {
-      if (!text.endsWith(".") && !text.endsWith("!")) {
-        shortList.push(infoArray.shift());
+    let index = 0;
+
+    while (index < infoArray.length) {
+      const text = infoArray[index];
+
+      if (
+        !text.endsWith(".") &&
+        !text.endsWith("!") &&
+        !text.endsWith(". ") &&
+        !text.endsWith("! ")
+      ) {
+        shortList.push(infoArray[index]);
+      } else {
+        shortList.push(infoArray[index]);
+        finalInfoArray.push(shortList.join(""));
+        shortList.length = 0;
       }
-      if (text.endsWith("." || text.endsWith("!"))) {
-        shortList.push(infoArray.shift());
-        finalArray.push(shortList.join(""));
-        shortList.splice(0);
-      }
+      index++;
     }
 
-    console.log(titlesArray);
-    console.log(datesArray);
-    // console.log(finalArray);
+    // CREATE RECORD FUNCTION
+
+    for (let i = 0; i < result[0]["titles"].length; i++) {
+      const record = {
+        "Show Title": titlesArray[i],
+        "Full Show Description": finalInfoArray[i],
+        // Date: startDatesArray[i],
+        // "End Date": endDatesArray[i],
+      };
+      // base(tableName).create(record, function (err, record) {
+      //   if (err) {
+      //     console.error("Error inserting into Airtable:", err);
+      //     return;
+      //   }
+      //   console.log("Inserted into Airtable:", record.getId());
+      // });
+      console.log(record);
+    }
   })
   .catch((err) => console.log(err));
