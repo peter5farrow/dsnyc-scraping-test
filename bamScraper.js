@@ -11,7 +11,7 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(
 const tableName = "Shows";
 const url = process.env.BAM_URL;
 
-async function scrapeSite() {
+async function scrapeBam() {
   const { data } = await axios.get(url);
   const $ = cheerio.load(data);
 
@@ -26,7 +26,7 @@ async function scrapeSite() {
   return results;
 }
 
-scrapeSite()
+scrapeBam()
   .then((result) => {
     const titlesArray = [];
     const startDatesArray = [];
@@ -34,8 +34,9 @@ scrapeSite()
     const infoArray = [];
 
     const d = new Date();
-    // let year = d.getFullYear();
-    const year = 2002;
+    let year = d.getFullYear();
+    // For not interfering with current table:
+    // const year = 2002;
 
     for (let i = 0; i < result[0]["titles"].length; i++) {
       titlesArray.push(result[0]["titles"][`${i}`]["children"][0]["data"]);
@@ -85,9 +86,12 @@ scrapeSite()
       const record = {
         "Show Title": titlesArray[i],
         "Full Show Description": finalInfoArray[i],
-        // Date: startDatesArray[i],
-        // "End Date": endDatesArray[i],
+        Date: startDatesArray[i],
+        "End Date": endDatesArray[i],
       };
+
+      // CREATES RECORDS IN AIRTABLE!!
+
       // base(tableName).create(record, function (err, record) {
       //   if (err) {
       //     console.error("Error inserting into Airtable:", err);
