@@ -79,10 +79,10 @@ scrapeJoyce()
     }
 
     for (let i = 0; i < result[0]["images"].length; i++) {
-      imagesArray.push(result[0]["images"][`${i}`].children[0].data);
+      imagesArray.push(
+        result[0]["images"][`${i}`].children[0].data.split("'")[1]
+      );
     }
-
-    console.log(result[0]["images"][0].children[0].data);
 
     // CREATE RECORD FUNCTION
 
@@ -95,7 +95,7 @@ scrapeJoyce()
         Neighborhood: "Chelsea",
         Date: startDatesArray[i],
         Link: `https://www.joyce.org${linksArray[i]}`,
-        Image: "IMAGE HERE",
+        Image: [{ url: imagesArray[i] }],
         "End Date": endDatesArray[i],
       };
 
