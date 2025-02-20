@@ -21,7 +21,10 @@ async function scrapeJoyce() {
     const startDates = $(elem).find("span.start");
     const endDates = $(elem).find("span.end");
     const info = $(elem).find("a div.tagline");
-    results.push({ companies, startDates, endDates, info });
+    const links = $(elem).find("a.desc");
+    const images = $(elem).find("li.eventCard style");
+
+    results.push({ companies, startDates, endDates, info, links, images });
   });
 
   return results;
@@ -32,8 +35,9 @@ scrapeJoyce()
     const companiesArray = [];
     const startDatesArray = [];
     const endDatesArray = [];
-    const datesArray = [];
     const infoArray = [];
+    const linksArray = [];
+    const imagesArray = [];
 
     const d = new Date();
     let year = d.getFullYear();
@@ -66,13 +70,19 @@ scrapeJoyce()
       );
     }
 
-    for (let i = 0; i < startDatesArray.length; i++) {
-      datesArray.push(`${startDatesArray[i]} - ${endDatesArray[i]}`);
-    }
-
     for (let i = 0; i < result[0]["info"].length; i++) {
       infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
     }
+
+    for (let i = 0; i < result[0]["links"].length; i++) {
+      linksArray.push(result[0]["links"][`${i}`].attribs.href);
+    }
+
+    for (let i = 0; i < result[0]["images"].length; i++) {
+      imagesArray.push(result[0]["images"][`${i}`].children[0].data);
+    }
+
+    console.log(result[0]["images"][0].children[0].data);
 
     // CREATE RECORD FUNCTION
 
@@ -80,7 +90,12 @@ scrapeJoyce()
       const record = {
         "Show Title": companiesArray[i],
         "Full Show Description": infoArray[i],
+        Venue: "The Joyce Theater",
+        Borough: "Manhattan",
+        Neighborhood: "Chelsea",
         Date: startDatesArray[i],
+        Link: `https://www.joyce.org${linksArray[i]}`,
+        Image: "IMAGE HERE",
         "End Date": endDatesArray[i],
       };
 
@@ -93,7 +108,8 @@ scrapeJoyce()
       //   }
       //   console.log("Inserted into Airtable:", record.getId());
       // });
-      console.log(record);
+
+      // console.log(record);
     }
   })
   .catch((err) => console.log(err));
