@@ -93,6 +93,7 @@ scrapeJoyce()
         Venue: "The Joyce Theater",
         Borough: "Manhattan",
         Neighborhood: "Chelsea",
+        Price: "$27",
         Date: startDatesArray[i],
         Link: `https://www.joyce.org${linksArray[i]}`,
         Image: [{ url: imagesArray[i] }],
@@ -108,6 +109,8 @@ scrapeJoyce()
       //   }
       //   console.log("Inserted into Airtable:", record.getId());
       // });
+
+      // FOR TESTING:
 
       // console.log(record);
     }
