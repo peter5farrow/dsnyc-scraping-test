@@ -93,7 +93,7 @@ scrapeJoyce()
         Venue: "The Joyce Theater",
         Borough: "Manhattan",
         Neighborhood: "Chelsea",
-        Price: "$27",
+        Price: 27,
         Date: startDatesArray[i],
         Link: `https://www.joyce.org${linksArray[i]}`,
         Image: [{ url: imagesArray[i] }],
@@ -112,7 +112,7 @@ scrapeJoyce()
 
       // FOR TESTING:
 
-      // console.log(record);
+      console.log(record);
     }
   })
   .catch((err) => console.log(err));

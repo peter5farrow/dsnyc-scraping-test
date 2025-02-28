@@ -99,6 +99,9 @@ scrapeBam()
       //   }
       //   console.log("Inserted into Airtable:", record.getId());
       // });
+
+      // FOR TESTING:
+
       console.log(record);
     }
   })

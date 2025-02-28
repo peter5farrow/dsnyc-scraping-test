@@ -19,10 +19,10 @@ async function scrapeNycc() {
   $("div#TabPanel_2 ul.splide__list").each((i, elem) => {
     const companies = $(elem).find("a.whats-on-carousel-title");
     const dates = $(elem).find("li div.rich-text");
-    const pictures = $(elem).find("div.whats-on-carousel-image img");
-    results.push({ companies, dates, pictures });
-
-    // console.log(dates[1]["children"][5]["children"]["data"]);
+    const info = [];
+    const links = $(elem).find("a.whats-on-carousel-title");
+    const images = $(elem).find("a.whats-on-carousel-image img");
+    results.push({ companies, dates, info, links, images });
   });
 
   return results;
@@ -33,7 +33,9 @@ scrapeNycc()
     const companiesArray = [];
     const startDatesArray = [];
     const endDatesArray = [];
-    const infoArray = [];
+    // const infoArray = [];
+    const linksArray = [];
+    const imagesArray = [];
 
     const d = new Date();
     let year = d.getFullYear();
@@ -45,8 +47,6 @@ scrapeNycc()
         result[0]["companies"][`${i}`]["children"][0]["data"]
       );
     }
-
-    // console.log(Object.keys(result[0]["dates"][2]["children"]));
 
     // Long one
     for (let i = 0; i < result[0]["dates"].length; i++) {
@@ -81,27 +81,39 @@ scrapeNycc()
 
         // No date
       } else {
-        startDatesArray.push("NONE");
-        endDatesArray.push("NONE");
+        startDatesArray.push("");
+        endDatesArray.push("");
       }
     }
-
-    // for (let i = 0; i < startDatesArray.length; i++) {
-    //   datesArray.push(`${startDatesArray[i]} - ${endDatesArray[i]}`);
-    // }
 
     // for (let i = 0; i < result[0]["info"].length; i++) {
     //   infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
     // }
+
+    for (let i = 0; i < result[0]["links"].length; i++) {
+      linksArray.push(result[0]["links"][`${i}`].attribs.href);
+    }
+
+    for (let i = 0; i < result[0]["images"].length; i++) {
+      imagesArray.push(
+        `https://www.nycitycenter.org${result[0]["images"][`${i}`].attribs.src}`
+      );
+    }
 
     // CREATE RECORD FUNCTION
 
     for (let i = 0; i < result[0]["companies"].length; i++) {
       const record = {
         "Show Title": companiesArray[i],
-        // "Full Show Description": infoArray[i],
-        Date: startDatesArray[i],
-        "End Date": endDatesArray[i],
+        "Full Show Description": "",
+        Venue: "New York City Center",
+        Borough: "Manhattan",
+        Neighborhood: "Midtown",
+        Price: 45,
+        // Date: startDatesArray[i],
+        Link: `https://www.nycitycenter.org${linksArray[i]}`,
+        Image: [{ url: imagesArray[i] }],
+        // "End Date": endDatesArray[i],
       };
 
       // CREATES RECORDS IN AIRTABLE!!
@@ -113,6 +125,9 @@ scrapeNycc()
       //   }
       //   console.log("Inserted into Airtable:", record.getId());
       // });
+
+      // FOR TESTING:
+
       console.log(record);
     }
   })
