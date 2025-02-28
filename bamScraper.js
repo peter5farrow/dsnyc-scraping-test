@@ -17,10 +17,12 @@ async function scrapeBam() {
 
   const results = [];
   $("div #multiContainer_Dance ul").each((i, elem) => {
-    const titles = $(elem).find("li h3.bam-block-2x4-title");
+    const companies = $(elem).find("li h3.bam-block-2x4-title");
     const dates = $(elem).find("li p.bam-block-2x4-date");
     const info = $(elem).find("li div.bam-block-2x4-hover-body p span");
-    results.push({ titles, dates, info });
+    const links = $(elem).find("div a.btn");
+    const images = $(elem).find("div.bam-block-2x4-top img");
+    results.push({ companies, dates, info, links, images });
   });
 
   return results;
@@ -28,18 +30,22 @@ async function scrapeBam() {
 
 scrapeBam()
   .then((result) => {
-    const titlesArray = [];
+    const companiesArray = [];
     const startDatesArray = [];
     const endDatesArray = [];
     const infoArray = [];
+    const linksArray = [];
+    const imagesArray = [];
 
     const d = new Date();
     let year = d.getFullYear();
     // For not interfering with current table:
     // const year = 2002;
 
-    for (let i = 0; i < result[0]["titles"].length; i++) {
-      titlesArray.push(result[0]["titles"][`${i}`]["children"][0]["data"]);
+    for (let i = 0; i < result[0]["companies"].length; i++) {
+      companiesArray.push(
+        result[0]["companies"][`${i}`]["children"][0]["data"]
+      );
     }
 
     for (let i = 0; i < result[0]["dates"].length; i++) {
@@ -80,14 +86,32 @@ scrapeBam()
       index++;
     }
 
+    for (let i = 0; i < result[0]["links"].length; i++) {
+      linksArray.push(
+        `https://www.bam.org${result[0]["links"][`${i}`].attribs.href}`
+      );
+    }
+
+    for (let i = 0; i < result[0]["images"].length; i++) {
+      imagesArray.push(
+        `https://www.bam.org${result[0]["images"][`${i}`].attribs.src}`
+      );
+    }
+
     // CREATE RECORD FUNCTION
 
-    for (let i = 0; i < result[0]["titles"].length; i++) {
+    for (let i = 0; i < result[0]["companies"].length; i++) {
       const record = {
-        "Show Title": titlesArray[i],
+        "Show Title": companiesArray[i],
         "Full Show Description": finalInfoArray[i],
-        Date: startDatesArray[i],
-        "End Date": endDatesArray[i],
+        Venue: "BAM (Brooklyn Academy of Music)",
+        Borough: "Brooklyn",
+        Neighborhood: "Fort Greene",
+        Price: 35,
+        // Date: startDatesArray[i],
+        Link: linksArray[i],
+        Image: [{ url: imagesArray[i] }],
+        // "End Date": endDatesArray[i],
       };
 
       // CREATES RECORDS IN AIRTABLE!!
