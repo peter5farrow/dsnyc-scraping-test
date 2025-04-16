@@ -19,7 +19,7 @@ async function scrapeBam() {
   $("div #multiContainer_Dance ul").each((i, elem) => {
     const companies = $(elem).find("li h3.bam-block-2x4-title");
     const dates = $(elem).find("li p.bam-block-2x4-date");
-    const info = $(elem).find("li div.bam-block-2x4-hover-body p span");
+    const info = $(elem).find("li div.bam-block-2x4-hover-body");
     const links = $(elem).find("div a.btn");
     const images = $(elem).find("div.bam-block-2x4-top img");
     results.push({ companies, dates, info, links, images });
@@ -61,7 +61,15 @@ scrapeBam()
     }
 
     for (let i = 0; i < result[0]["info"].length; i++) {
-      infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
+      if (result[0]["info"][`${i}`]["children"][0]["data"]) {
+        infoArray.push(result[0]["info"][`${i}`]["children"][0]["data"]);
+      } else {
+        infoArray.push(
+          result[0]["info"][`${i}`]["children"][0]["children"][0][
+            "children"
+          ][0]["data"]
+        );
+      }
     }
 
     const finalInfoArray = [];
