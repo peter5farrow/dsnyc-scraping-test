@@ -108,10 +108,10 @@ scrapeBam()
         Borough: "Brooklyn",
         Neighborhood: "Fort Greene",
         Price: 35,
-        // Date: startDatesArray[i],
+        Date: startDatesArray[i],
         Link: linksArray[i],
         Image: [{ url: imagesArray[i] }],
-        // "End Date": endDatesArray[i],
+        "End Date": endDatesArray[i],
       };
 
       // CREATES RECORDS IN AIRTABLE!!
